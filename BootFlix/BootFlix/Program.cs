@@ -20,14 +20,15 @@ namespace BootFlix
 
         static void Main(string[] args)
         {
-            Menu();
+            List<Cliente> listaClientes = new List<Cliente>();
+            Menu(listaClientes);
         }
-        static void Menu()
+        static void Menu(List<Cliente> listaClientes)
         {
             int optMenu = 0;
             do
             {
-                Console.WriteLine("Bienvenido a BooFlix \n");
+                Console.WriteLine("Bienvenido a BooFlix\n-------------------");
                 Console.WriteLine("1)Loguearse\n2)Registrarse\n3)Salir");
                 optMenu = Convert.ToInt32(Console.ReadLine());
 
@@ -35,12 +36,14 @@ namespace BootFlix
                 {
                     case 1:
                         Loguearse();
+                        Menu2();
                         break;
                     case 2:
-                        Registrarse();
+                        Registrarse(listaClientes);
                         break;
                     case 3:
                         Console.WriteLine("Salir");
+                        Console.ReadLine();
                         break;
                     default:
                         Console.WriteLine("Error Ingresa de nuevo");
@@ -52,7 +55,7 @@ namespace BootFlix
 
             Console.ReadLine();
         }
-        static void Registrarse()
+        static void Registrarse(List<Cliente> listaClientes)
         {
             //CREAR CODIGO DE RESERVA
             conexion.Open();
@@ -83,14 +86,9 @@ namespace BootFlix
             Console.WriteLine("Dia de nacimiento(dd): ");
             int day = Convert.ToInt32(Console.ReadLine());           
             fechaNacimiento = new DateTime(year, month, day);
-
-
-            conexion.Open();
-            cadena = "INSERT INTO Clientes VALUES ('" +idCliente+ "','" + correoElectronico + "','" + contrasenia + "','" + fechaNacimiento + "','" + nombre+ "')";
-            comando = new SqlCommand(cadena,conexion);
-            comando.ExecuteNonQuery();
-            conexion.Close();
-            
+            Cliente cliente = new Cliente(nombre, correoElectronico, idCliente, fechaNacimiento, contrasenia);
+            listaClientes.Add(cliente);
+            cliente.CrearCliente();                     
         }
         static void Loguearse()
         {
@@ -108,14 +106,14 @@ namespace BootFlix
 
                 if (registros.Read())
                 {
-                    Console.WriteLine("Le aparecera un menu con las opciones");
+                    Menu2();
                     registros.Close();
                     contra = false;
                 }
                 else
                 {
                     contra = false;
-                    Console.WriteLine("No estas registrado , te invitamos a registrarte ;)");
+                    Console.WriteLine("No estas registrado, te invitamos a registrarte ;)");
                 }
 
                 conexion.Close();
@@ -124,6 +122,57 @@ namespace BootFlix
             } while (contra != false);
 
         }
+        static void Menu2()
+        {
+            int optMenu2;
+            do
+            {
+                Console.WriteLine("\nBienvenido a BooFlix\n********************");
+                Console.WriteLine("1)Consultar peliculas para su edad\n2)Consultar peliculas para su edad disponibles\n3)Mis peliculas\n4)Salir");
+                optMenu2 = Convert.ToInt32(Console.ReadLine());
+
+                switch (optMenu2)
+                {
+                    case 1://peliculas filtradas
+                        //PeliculasFiltradas(); //crearla en la clase pelicula
+                        break;
+                    case 2://peliculas filtradas disponibles
+                        //PeliculasFiltradasDisponibles(); //crearla en la clase pelicula
+                        break;
+                    case 3://mis peliculas
+                        MisPeliculas();
+                        Console.ReadLine();
+                        break;
+                    case 4://salir
+                        Console.WriteLine("Salir");
+                        Console.ReadLine();
+                        break;
+                    default:
+                        Console.WriteLine("Error Ingresa de nuevo");
+                        Console.ReadLine();
+                        Console.Clear();
+                        break;
+                }
+            }
+            while (optMenu2 != 4);
+            Console.ReadLine();
+        }
+        static void MisPeliculas()
+        {
+
+        }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
