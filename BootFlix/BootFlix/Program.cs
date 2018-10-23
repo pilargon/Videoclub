@@ -14,7 +14,9 @@ namespace BootFlix
         static SqlConnection conexion = new SqlConnection(connectionString);
         static string cadena;
         static SqlCommand comando;
+
         private static string contrasenia;
+        private static int idCliente = 0;
 
         static void Main(string[] args)
         {
@@ -50,11 +52,23 @@ namespace BootFlix
 
             Console.ReadLine();
         }
-
         static void Registrarse()
         {
+            //CREAR CODIGO DE RESERVA
+            conexion.Open();
+            cadena = "SELECT max(idCliente) AS 'EntryCount' FROM CLIENTES;";
+            comando = new SqlCommand(cadena, conexion);
+            SqlDataReader registros = comando.ExecuteReader();
+            while (registros.Read())
+            {
+                idCliente = Convert.ToInt32(registros["EntryCount"])+1;
+            }           
+            conexion.Close();
+            registros.Close();
+
+
             string nombre, correoElectronico, contrasenia;
-            int fechaNacimiento;
+            DateTime fechaNacimiento;
             Console.WriteLine("Registro de Clientes\n");
             Console.WriteLine("Ingrese Nombre: ");
             nombre = Console.ReadLine();
@@ -62,36 +76,33 @@ namespace BootFlix
             correoElectronico = Console.ReadLine();
             Console.WriteLine("Contraseña: ");
             contrasenia = Console.ReadLine();
-            Console.WriteLine("Año de nacimiento: ");
+            Console.WriteLine("Año de nacimiento(yyyy): ");
             int year = Convert.ToInt32(Console.ReadLine());
-            Console.WriteLine("Mes de nacimiento: ");
+            Console.WriteLine("Mes de nacimiento(mm): ");
             int month = Convert.ToInt32(Console.ReadLine());
-            Console.WriteLine("Dia de nacimiento: ");
-            int day = Convert.ToInt32(Console.ReadLine());
-            new DateTime(year, month, day);
-            fechaNacimiento = Convert.ToInt32(Console.ReadLine());
+            Console.WriteLine("Dia de nacimiento(dd): ");
+            int day = Convert.ToInt32(Console.ReadLine());           
+            fechaNacimiento = new DateTime(year, month, day);
 
 
             conexion.Open();
-            cadena = "INSERT INTO Clientes VALUES ('" + nombre + "','" + correoElectronico + "','" + contrasenia + "','" + fechaNacimiento+ "')";
+            cadena = "INSERT INTO Clientes VALUES ('" +idCliente+ "','" + correoElectronico + "','" + contrasenia + "','" + fechaNacimiento + "','" + nombre+ "')";
             comando = new SqlCommand(cadena,conexion);
             comando.ExecuteNonQuery();
             conexion.Close();
+            
         }
-        // conexion.Open();
-        //cadena = "INSERT INTO  VALUES (dni,nombre,apellido)";
-        //cadena = "INSERT INTO  VALUES (NHab,CheckIn)";
-        //comando = new SqlCommand(cadena, conexion);
-        //comando.ExecuteNonQuery();
-        //conexion.Close();
-
         static void Loguearse()
         {
             bool contra = true;
             do
-            {
+            {   //pide al loguearse nombre y contrase;a y busca si coinciden ambas en la BBDD
+                Console.WriteLine("Dime tu nombre: ");
+                string nombre = Console.ReadLine();
+                Console.WriteLine("Dime tu contraseña: ");
+                string contrasenia = Console.ReadLine();
                 conexion.Open();
-                cadena = "SELECT * FROM Clientes WHERE contraseña = '" + contrasenia + "'";
+                cadena = "SELECT * FROM Clientes WHERE nombre = '" + nombre + "' AND contraseña= '" + contrasenia+"'";
                 comando = new SqlCommand(cadena, conexion);
                 SqlDataReader registros = comando.ExecuteReader();
 
