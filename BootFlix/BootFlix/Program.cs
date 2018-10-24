@@ -21,14 +21,18 @@ namespace BootFlix
         static void Main(string[] args)
         {
             List<Cliente> listaClientes = new List<Cliente>();
-            Menu(listaClientes);
+            Cliente c = new Cliente();
+            List<Pelicula> listaPeliculas = new List<Pelicula>();
+            Pelicula p = new Pelicula();
+            Menu();
         }
-        static void Menu(List<Cliente> listaClientes)
+        
+        static void Menu()
         {
             int optMenu = 0;
             do
             {
-                Console.WriteLine("Bienvenido a BooFlix\n-------------------");
+                Console.WriteLine("Bienvenido a BootFlix\n-------------------");
                 Console.WriteLine("1)Loguearse\n2)Registrarse\n3)Salir");
                 optMenu = Convert.ToInt32(Console.ReadLine());
 
@@ -39,7 +43,7 @@ namespace BootFlix
                         Menu2();
                         break;
                     case 2:
-                        Registrarse(listaClientes);
+                        Registrarse();
                         break;
                     case 3:
                         Console.WriteLine("Salir");
@@ -55,8 +59,12 @@ namespace BootFlix
 
             Console.ReadLine();
         }
-        static void Registrarse(List<Cliente> listaClientes)
+        static void Registrarse()
         {
+            List<Cliente> listaClientes = new List<Cliente>();
+            Cliente c = new Cliente();
+            List<Pelicula> listaPeliculas = new List<Pelicula>();
+            Pelicula p = new Pelicula();
             //CREAR CODIGO DE RESERVA
             conexion.Open();
             cadena = "SELECT max(idCliente) AS 'EntryCount' FROM CLIENTES;";
@@ -64,8 +72,8 @@ namespace BootFlix
             SqlDataReader registros = comando.ExecuteReader();
             while (registros.Read())
             {
-                idCliente = Convert.ToInt32(registros["EntryCount"])+1;
-            }           
+                idCliente = Convert.ToInt32(registros["EntryCount"]) + 1;
+            }
             conexion.Close();
             registros.Close();
 
@@ -79,34 +87,30 @@ namespace BootFlix
             correoElectronico = Console.ReadLine();
             Console.WriteLine("Contraseña: ");
             contrasenia = Console.ReadLine();
-            Console.WriteLine("Año de nacimiento(yyyy): ");
-            int year = Convert.ToInt32(Console.ReadLine());
-            Console.WriteLine("Mes de nacimiento(mm): ");
-            int month = Convert.ToInt32(Console.ReadLine());
-            Console.WriteLine("Dia de nacimiento(dd): ");
-            int day = Convert.ToInt32(Console.ReadLine());           
-            fechaNacimiento = new DateTime(year, month, day);
+            Console.WriteLine("Inserte fecha de nacimiento(dd/mm/yyyy):");
+            fechaNacimiento = Convert.ToDateTime(Console.ReadLine());
+            
             Cliente cliente = new Cliente(nombre, correoElectronico, idCliente, fechaNacimiento, contrasenia);
             listaClientes.Add(cliente);
-            cliente.CrearCliente();                     
+            cliente.CrearCliente();
         }
         static void Loguearse()
         {
             bool contra = true;
             do
             {   //pide al loguearse nombre y contrase;a y busca si coinciden ambas en la BBDD
-                Console.WriteLine("Dime tu nombre: ");
-                string nombre = Console.ReadLine();
+                Console.WriteLine("Dime tu correo electronico: ");
+                string correoElectronico = Console.ReadLine();
                 Console.WriteLine("Dime tu contraseña: ");
                 string contrasenia = Console.ReadLine();
                 conexion.Open();
-                cadena = "SELECT * FROM Clientes WHERE nombre = '" + nombre + "' AND contraseña= '" + contrasenia+"'";
+                cadena = "SELECT * FROM Clientes WHERE correoElectronico = '" + correoElectronico + "' AND contraseña= '" + contrasenia + "'";
                 comando = new SqlCommand(cadena, conexion);
                 SqlDataReader registros = comando.ExecuteReader();
 
                 if (registros.Read())
                 {
-                    Menu2();
+                    //Menu2();
                     registros.Close();
                     contra = false;
                 }
@@ -115,7 +119,6 @@ namespace BootFlix
                     contra = false;
                     Console.WriteLine("No estas registrado, te invitamos a registrarte ;)");
                 }
-
                 conexion.Close();
                 registros.Close();
 
@@ -134,10 +137,10 @@ namespace BootFlix
                 switch (optMenu2)
                 {
                     case 1://peliculas filtradas
-                        //PeliculasFiltradas(); //crearla en la clase pelicula
+                        ConsultaPeliculasFiltradas(GetCorreoElectronico());
                         break;
                     case 2://peliculas filtradas disponibles
-                        //PeliculasFiltradasDisponibles(); //crearla en la clase pelicula
+                        ConsultaPeliculasFiltradasDisponibles();
                         break;
                     case 3://mis peliculas
                         MisPeliculas();
@@ -157,26 +160,112 @@ namespace BootFlix
             while (optMenu2 != 4);
             Console.ReadLine();
         }
+        //HACEMOS UNA CONSULTA A LA TABLA PELICULA DE LAS PELICULAS FILTRADAS POR EDAD Y DISPONIBLE
+        public static void ConsultaPeliculasFiltradasDisponibles(string correoElectronico)
+        {
+            conexion.Open();
+            cadena = "select DATEDIFF(YEAR, FechaNacimiento, GETDATE()) AS 'EDAD' FROM Clientes where IdCliente like '" + correoElectronico+ "'";
+            comando = new SqlCommand(cadena, conexion);
+            SqlDataReader edadRec = comando.ExecuteReader();
+            edadRec.Read();
+            int edad = Convert.ToInt32(edadRec[0].ToString());
+            conexion.Close();
+
+            conexion.Open();
+            cadena = "SELECT * FROM PELICULAS WHERE Estado like 'LIBRE' AND Edad <= '" + edad + "' ";
+            comando = new SqlCommand(cadena, conexion);
+            SqlDataReader registros = comando.ExecuteReader();
+            //Console.WriteLine(registros["Peliculas"].ToString() + "\t" + registros["Edad"].ToString());
+            Console.ReadLine();
+            while (registros.Read())
+            {
+                Console.WriteLine(registros["Título"].ToString());
+                Console.WriteLine();
+                // Pelicula p = new Pelicula(registros["Peliculas"].ToString());
+                //listaPeliculas.Add(p);
+            }
+            //foreach (Pelicula pelis in listaPeliculas)
+            //{
+            //    Console.WriteLine(pelis.MostrarPeliculas());
+            //}
+            conexion.Close();
+        }
+        //HACEMOS UNA CONSULTA A LA TABLA PELICULA DE LAS PELICULAS FILTRADAS POR EDAD
+        public static void ConsultaPeliculasFiltradas(string correoElectronico)
+        {
+            conexion.Open();
+            cadena = "select DATEDIFF(YEAR, FechaNacimiento, GETDATE()) AS 'EDAD' FROM Clientes where IdCliente like '" + correoElectronico + "'";
+            comando = new SqlCommand(cadena, conexion);
+            SqlDataReader edadRec = comando.ExecuteReader();
+            edadRec.Read();
+            int edad = Convert.ToInt32(edadRec[0].ToString());
+            conexion.Close();
+
+            conexion.Open();
+            cadena = "SELECT * FROM PELICULAS WHERE EDAD <= '" + correoElectronico + "' ";
+            comando = new SqlCommand(cadena, conexion);
+            SqlDataReader registros = comando.ExecuteReader();
+            //Console.WriteLine(registros["Peliculas"].ToString() + "\t" + registros["Edad"].ToString());
+            Console.ReadLine();
+            while (registros.Read())
+            {
+                Console.WriteLine(registros["Título"].ToString());
+                Console.WriteLine();
+            }
+            //foreach (Pelicula pelis in listaPeliculas)
+            //{
+            //    Console.WriteLine(pelis.MostrarPeliculas());
+            //}
+            conexion.Close();
+        }
         static void MisPeliculas()
         {
+            int optMisPeliculas;
+            do
+            {
+                Console.WriteLine("\nMis Peliculas\n********************" + "(Pulsar pelicula para opciones)\n");
+                conexion.Open();
+                cadena = "SELECT * FROM ALQUILERES";
+                comando = new SqlCommand(cadena, conexion);
+                SqlDataReader registros = comando.ExecuteReader();
+                Console.WriteLine(registros["IdPeliculaAlquilada"].ToString());
+                conexion.Close();
 
+                optMisPeliculas = Convert.ToInt32(Console.ReadLine());
+
+                switch (optMisPeliculas)
+                {
+                    case 1://
+                        break;
+                    case 2://
+                        break;
+                    case 3://
+                        break;
+                    case 4://salir
+                        break;
+                    default:
+                        break;
+                }
+            }
+            while (optMisPeliculas != 4);
+            Console.ReadLine();
         }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     }
-    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
+
+

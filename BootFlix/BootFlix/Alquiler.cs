@@ -15,5 +15,20 @@ namespace BootFlix
         static string cadena;
         static SqlCommand comando;
 
+        public void MisPeliculas()
+        {
+            conexion.Open();
+            cadena = "SELECT * FROM PELICULAS WHERE PELICULAS 'Edad' >=18 ";
+            comando = new SqlCommand(cadena, conexion);
+            SqlDataReader registros = comando.ExecuteReader();
+            while (registros.Read())
+
+                Console.WriteLine(registros["Peliculas"].ToString() + "\t" + registros["Edad"].ToString());
+            Console.ReadLine();
+            conexion.Close();
+        }
+
+
+
     }
 }
