@@ -246,7 +246,7 @@ namespace BootFlix
                 IdAlquiler = Convert.ToInt32(IdAlquilerR["maximo"].ToString()) + 1;
             }
             
-            //ACTUALIZAR ALQUILERES
+            //ACTUALIZAR ALQUILERE
             conexion.Open();
             cadena = "INSERT INTO Alquileres(IdAlquiler,FechaAlquiler, FechaDevolución,IdCliente,IdPeliculaAlquilada) VALUES ('"+IdAlquiler+"','" + DateTime.Today + "','" + DateTime.Today.AddDays(10) + "','" + IdCliente + "','"+IdPeliculaAlquilada+"')";
             comando = new SqlCommand(cadena, conexion);
