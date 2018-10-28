@@ -22,11 +22,11 @@ namespace BootFlix
         {
             List<Cliente> listaClientes = new List<Cliente>();
             Cliente c = new Cliente();
-            List<Pelicula> listaPeliculas = new List<Pelicula>();
+
             Pelicula p = new Pelicula();
             Menu();
         }
-        
+
         static void Menu()
         {
             int optMenu = 0;
@@ -40,7 +40,6 @@ namespace BootFlix
                 {
                     case 1:
                         Loguearse();
-                        Menu2();
                         break;
                     case 2:
                         Registrarse();
@@ -62,10 +61,7 @@ namespace BootFlix
         static void Registrarse()
         {
             List<Cliente> listaClientes = new List<Cliente>();
-            Cliente c = new Cliente();
-            List<Pelicula> listaPeliculas = new List<Pelicula>();
-            Pelicula p = new Pelicula();
-            //CREAR CODIGO DE RESERVA
+           
             conexion.Open();
             cadena = "SELECT max(idCliente) AS 'EntryCount' FROM CLIENTES;";
             comando = new SqlCommand(cadena, conexion);
@@ -89,7 +85,7 @@ namespace BootFlix
             contrasenia = Console.ReadLine();
             Console.WriteLine("Inserte fecha de nacimiento(dd/mm/yyyy):");
             fechaNacimiento = Convert.ToDateTime(Console.ReadLine());
-            
+
             Cliente cliente = new Cliente(nombre, correoElectronico, idCliente, fechaNacimiento, contrasenia);
             listaClientes.Add(cliente);
             cliente.CrearCliente();
@@ -110,7 +106,7 @@ namespace BootFlix
 
                 if (registros.Read())
                 {
-                    //Menu2();
+                    Menu2(correoElectronico);
                     registros.Close();
                     contra = false;
                 }
@@ -125,28 +121,33 @@ namespace BootFlix
             } while (contra != false);
 
         }
-        static void Menu2()
+
+        public static void Menu2(string correoElectronico)
         {
             int optMenu2;
             do
             {
                 Console.WriteLine("\nBienvenido a BooFlix\n********************");
-                Console.WriteLine("1)Consultar peliculas para su edad\n2)Consultar peliculas para su edad disponibles\n3)Mis peliculas\n4)Salir");
+                Console.WriteLine("1)Consultar peliculas para su edad\n2)Consultar peliculas para su edad disponibles\n3)Reservar\n4)Mis peliculas\n5)Salir");
                 optMenu2 = Convert.ToInt32(Console.ReadLine());
 
                 switch (optMenu2)
                 {
                     case 1://peliculas filtradas
-                        ConsultaPeliculasFiltradas(GetCorreoElectronico());
+                        ConsultaPeliculasFiltradas(correoElectronico);
                         break;
                     case 2://peliculas filtradas disponibles
-                        ConsultaPeliculasFiltradasDisponibles();
+                        ConsultaPeliculasFiltradasDisponibles(correoElectronico);
                         break;
                     case 3://mis peliculas
+                        Reservar();
+                        Console.ReadLine();
+                        break;
+                    case 4:
                         MisPeliculas();
                         Console.ReadLine();
                         break;
-                    case 4://salir
+                    case 5://salir
                         Console.WriteLine("Salir");
                         Console.ReadLine();
                         break;
@@ -160,11 +161,13 @@ namespace BootFlix
             while (optMenu2 != 4);
             Console.ReadLine();
         }
-        //HACEMOS UNA CONSULTA A LA TABLA PELICULA DE LAS PELICULAS FILTRADAS POR EDAD Y DISPONIBLE
+
         public static void ConsultaPeliculasFiltradasDisponibles(string correoElectronico)
         {
+            List<Pelicula> listaPeliculas = new List<Pelicula>();
+            conexion.Close();
             conexion.Open();
-            cadena = "select DATEDIFF(YEAR, FechaNacimiento, GETDATE()) AS 'EDAD' FROM Clientes where IdCliente like '" + correoElectronico+ "'";
+            cadena = "select DATEDIFF(YEAR, FechaNacimiento, GETDATE()) AS 'EDAD' FROM Clientes where CorreoElectronico = '" + correoElectronico + "'";
             comando = new SqlCommand(cadena, conexion);
             SqlDataReader edadRec = comando.ExecuteReader();
             edadRec.Read();
@@ -179,44 +182,79 @@ namespace BootFlix
             Console.ReadLine();
             while (registros.Read())
             {
-                Console.WriteLine(registros["Título"].ToString());
-                Console.WriteLine();
-                // Pelicula p = new Pelicula(registros["Peliculas"].ToString());
-                //listaPeliculas.Add(p);
+                Pelicula p = new Pelicula(registros["Peliculas"].ToString());
+                listaPeliculas.Add(p);
             }
-            //foreach (Pelicula pelis in listaPeliculas)
-            //{
-            //    Console.WriteLine(pelis.MostrarPeliculas());
-            //}
+            foreach (Pelicula pelis in listaPeliculas)
+            {
+                Console.WriteLine(pelis.MostrarPeliculas());
+            }
             conexion.Close();
+            registros.Close();
         }
-        //HACEMOS UNA CONSULTA A LA TABLA PELICULA DE LAS PELICULAS FILTRADAS POR EDAD
+
         public static void ConsultaPeliculasFiltradas(string correoElectronico)
         {
+            List<Pelicula> listaPeliculas = new List<Pelicula>();
+            conexion.Close();
             conexion.Open();
-            cadena = "select DATEDIFF(YEAR, FechaNacimiento, GETDATE()) AS 'EDAD' FROM Clientes where IdCliente like '" + correoElectronico + "'";
+            cadena = "select DATEDIFF(YEAR, FechaNacimiento, GETDATE()) AS 'EDAD' FROM Clientes where CorreoElectronico = '" + correoElectronico + "'";
             comando = new SqlCommand(cadena, conexion);
             SqlDataReader edadRec = comando.ExecuteReader();
             edadRec.Read();
             int edad = Convert.ToInt32(edadRec[0].ToString());
             conexion.Close();
 
+
             conexion.Open();
-            cadena = "SELECT * FROM PELICULAS WHERE EDAD <= '" + correoElectronico + "' ";
+            cadena = "SELECT * FROM PELICULAS WHERE EDAD <= '" + edad + "' ";
             comando = new SqlCommand(cadena, conexion);
             SqlDataReader registros = comando.ExecuteReader();
-            //Console.WriteLine(registros["Peliculas"].ToString() + "\t" + registros["Edad"].ToString());
             Console.ReadLine();
             while (registros.Read())
             {
-                Console.WriteLine(registros["Título"].ToString());
+                Console.WriteLine(registros["Peliculas"].ToString());
                 Console.WriteLine();
             }
-            //foreach (Pelicula pelis in listaPeliculas)
-            //{
-            //    Console.WriteLine(pelis.MostrarPeliculas());
-            //}
+            foreach (Pelicula pelis in listaPeliculas)
+            {
+                Console.WriteLine(pelis.MostrarPeliculas());
+            }
             conexion.Close();
+        }
+
+        public static void Reservar()
+        {
+            Console.WriteLine("Escribe el titulo de la pelicula a reservar");
+            string titulo = Console.ReadLine();
+
+            //PONER PELI ELEGIDA COMO ALQUILADA
+            conexion.Open();
+            cadena = "UPDATE Peliculas SET Estado = 'ALQUILADA' WHERE Peliculas LIKE'" + titulo + "'";
+            comando = new SqlCommand(cadena, conexion);
+            SqlDataReader registros = comando.ExecuteReader();
+            conexion.Close();
+
+            //CREAR IDALQUILER
+            conexion.Open();
+            cadena = "SELECT max(IdAlquiler) AS maximo FROM Alquileres";
+            comando = new SqlCommand(cadena, conexion);
+            SqlDataReader IdAlquilerR = comando.ExecuteReader();
+            int IdAlquiler = 0;
+            if (IdAlquilerR.Read())
+            {
+                IdAlquiler = Convert.ToInt32(IdAlquilerR["maximo"].ToString()) + 1;
+            }
+            
+            //ACTUALIZAR ALQUILERES
+            conexion.Open();
+            cadena = "INSERT INTO Alquileres(IdAlquiler,FechaAlquiler, FechaDevolución,IdCliente,IdPeliculaAlquilada) VALUES ('"+IdAlquiler+"','" + DateTime.Today + "','" + DateTime.Today.AddDays(10) + "','" + IdCliente + "','"+IdPeliculaAlquilada+"')";
+            comando = new SqlCommand(cadena, conexion);
+            comando.ExecuteNonQuery();
+            conexion.Close();
+            Console.WriteLine("Su pelicula ha sido alquilada");
+            Console.ReadLine();
+
         }
         static void MisPeliculas()
         {

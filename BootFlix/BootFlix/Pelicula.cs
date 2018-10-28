@@ -75,18 +75,18 @@ namespace BootFlix
 
 
         //HACEMOS UNA CONSULTA A LA TABLA PELICULA DE LAS PELICULAS FILTRADAS POR EDAD Y LIBRES
-        public void ConsultaPeliculasFiltradasLibres()
-        {
-            conexion.Open();
-            cadena = "SELECT * FROM PELICULAS WHERE PELICULAS 'Edad' >=18 AND 'Estado' LIKE 'LIBRE' ";
-            comando = new SqlCommand(cadena, conexion);
-            SqlDataReader registros = comando.ExecuteReader();
-            while (registros.Read())
+        //public void ConsultaPeliculasFiltradasLibres()
+        //{
+        //    conexion.Open();
+        //    cadena = "SELECT * FROM PELICULAS WHERE PELICULAS 'Edad' >=18 AND 'Estado' LIKE 'LIBRE' ";
+        //    comando = new SqlCommand(cadena, conexion);
+        //    SqlDataReader registros = comando.ExecuteReader();
+        //    while (registros.Read())
 
-                Console.WriteLine(registros["Peliculas"].ToString() + "\t" + registros["Edad"].ToString() + "\t" + registros["Estado"].ToString());
-            Console.ReadLine();
-            conexion.Close();
-        }
+        //    Console.WriteLine(registros["Peliculas"].ToString() + "\t" + registros["Edad"].ToString() + "\t" + registros["Estado"].ToString());
+        //    Console.ReadLine();
+        //    conexion.Close();
+        //}
 
 
 
