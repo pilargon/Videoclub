@@ -301,7 +301,7 @@ namespace BootFlix
 
             //ACTUALIZAR ALQUILERES
 
-            //Alquiler alquiler = new Alquiler(fechaAlquiler,fechaDevolucion,idCliente,idPeliculas);
+            //Alquiler alquiler = new Alquiler(fechaAlquiler, fechaDevolucion, idCliente, idPeliculas);
             //listaAlquiler.Add(alquiler);
             //alquiler.CrearReserva();
 

@@ -17,6 +17,7 @@ namespace BootFlix
 
         private DateTime fechaAlquiler, fechaDevolucion;
         private int idCliente, idPeliculas;
+        private List<Alquiler> listaAlquiler;
 
         public Alquiler()
         {
